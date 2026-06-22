@@ -25,22 +25,39 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      # 3. Installe les dépendances
-      - name: Installer les dépendances
+      # 3. Installe Chrome (nécessaire pour Selenium)
+      - name: Installer Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
+
+      # 4. Installe ChromeDriver
+      - name: Installer ChromeDriver
+        uses: nanasess/setup-chromedriver@master
+
+      # 5. Installe les dépendances système (pour Selenium sur Linux)
+      - name: Installer dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb x11-utils
+
+      # 6. Installe les dépendances Python
+      - name: Installer dépendances Python
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Exécute le script de surveillance
+      # 7. Exécute le script de surveillance
       - name: Vérifier les logements CROUS
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
           DEBUG: 'false'
+          CHROMEDRIVER_PATH: /usr/local/share/chromedriver-linux64/chromedriver
         run: python mende_bot.py
 
-      # 5. Sauvegarde l'état dans le dépôt (optionnel)
+      # 8. Sauvegarde l'état dans le dépôt
       - name: Sauvegarder l'état
         if: always()
         uses: stefanzweifel/git-auto-commit-action@v5

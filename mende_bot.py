@@ -131,9 +131,21 @@ def setup_driver():
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--disable-gpu")
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         
-        service = Service(ChromeDriverManager().install())
+        # Sur GitHub Actions, chromedriver peut être situé ailleurs
+        chromedriver_path = os.getenv("CHROMEDRIVER_PATH")
+        
+        if chromedriver_path and os.path.exists(chromedriver_path):
+            # Utilise le chromedriver fourni par GitHub Actions
+            service = Service(chromedriver_path)
+            if DEBUG:
+                log_message(f"Utilisation du ChromeDriver: {chromedriver_path}", "INFO")
+        else:
+            # Utilise webdriver-manager pour télécharger automatiquement
+            service = Service(ChromeDriverManager().install())
+        
         driver = webdriver.Chrome(service=service, options=options)
         
         return driver

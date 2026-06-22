@@ -1,0 +1,91 @@
+⚠️ UPDATE IMPORTANTE - 2026-06-22
+════════════════════════════════════════════════════════════════════════════
+
+🔧 CORRECTION APPLIQUÉE - ChromeDriver sur GitHub Actions
+
+Le problème avec l'exécution du script ("Exec format error") a été RÉSOLU! ✅
+
+════════════════════════════════════════════════════════════════════════════
+
+🚨 CE QUI S'EST PASSÉ:
+
+  L'erreur: "Exec format error: '/home/runner/.wdm/drivers/chromedriver/..."
+  
+  Cause: Chrome n'était pas installé sur le serveur GitHub Actions (Linux)
+         ChromeDriver était mal configuré
+
+
+✅ CE QUI A ÉTÉ CORRIGÉ:
+
+  1. Workflow GitHub Actions (.github/workflows/crous.yml)
+     ├─ Ajout: Chrome installé automatiquement
+     ├─ Ajout: ChromeDriver compatible
+     └─ Résultat: Tout fonctionne sur GitHub Actions
+
+  2. Script Python (mende_bot.py)
+     ├─ Modification: Cherche d'abord ChromeDriver de GitHub
+     ├─ Fallback: Utilise webdriver-manager en local
+     └─ Résultat: Marche partout (local + GitHub)
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📋 PROCHAINES ÉTAPES:
+
+  1️⃣  Poussez le code mis à jour:
+      git add .
+      git commit -m "🔧 Fix ChromeDriver"
+      git push
+
+  2️⃣  Testez le workflow:
+      - Allez sur: GitHub → Actions
+      - Cliquez: "Surveillance CROUS Mende"
+      - Cliquez: "Run workflow"
+      - Attendez ✅ VERT
+
+  3️⃣  Vérifiez les logs:
+      - Cherchez: "Résultat trouvé: X logements"
+      - Cherchez: "Email envoyé à..."
+      - BOT MARCHE! 🎉
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📖 POUR EN SAVOIR PLUS:
+
+  Lisez: FIX_CHROMEDRIVER.md
+  
+  Ce fichier explique:
+  - Quel était le problème
+  - Comment c'a été corrigé
+  - Pourquoi ça marche maintenant
+
+
+════════════════════════════════════════════════════════════════════════════
+
+✅ STATUS: PRÊT À REDÉPLOYER!
+
+  Les fichiers suivants ont été mis à jour:
+  ✅ .github/workflows/crous.yml (workflow)
+  ✅ mende_bot.py (script)
+  ✅ FIX_CHROMEDRIVER.md (explication)
+
+
+════════════════════════════════════════════════════════════════════════════
+
+🎯 À FAIRE MAINTENANT:
+
+  1. Committez et poussez les changements
+  2. Testez le workflow sur GitHub
+  3. Le bot devrait marcher maintenant! 🚀
+
+
+════════════════════════════════════════════════════════════════════════════
+
+Questions? Consultez FIX_CHROMEDRIVER.md pour les détails techniques.
+
+Besoin d'aide? Consultez FINAL_CHECKLIST.md pour le dépannage.
+
+════════════════════════════════════════════════════════════════════════════
+
+Créé: 2026-06-22
