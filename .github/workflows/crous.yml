@@ -1,0 +1,50 @@
+name: Surveillance CROUS Mende
+
+on:
+  schedule:
+    # Exécute le script toutes les 5 minutes
+    - cron: '*/5 * * * *'
+  
+  # Permet également un déclenchement manuel depuis GitHub Actions
+  workflow_dispatch:
+
+jobs:
+  check_apartments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # 1. Récupère le code du dépôt
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      # 2. Configure Python 3.12
+      - name: Configurer Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      # 3. Installe les dépendances
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Exécute le script de surveillance
+      - name: Vérifier les logements CROUS
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+          DEBUG: 'false'
+        run: python mende_bot.py
+
+      # 5. Sauvegarde l'état dans le dépôt (optionnel)
+      - name: Sauvegarder l'état
+        if: always()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "📊 Mise à jour de l'état CROUS"
+          file_pattern: state.json
+          commit_options: '--no-verify'
