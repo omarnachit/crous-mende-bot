@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Script de surveillance des logements CROUS à Mende
-- Consulte la page CROUS toutes les 5 minutes
-- Détecte les nouveaux logements
-- Envoie un email Gmail si un nouveau logement apparaît
-- Sauvegarde l'état dans un fichier JSON
-"""
 
 import json
 import os
@@ -23,27 +16,22 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Configuration
 URL = "https://trouverunlogement.lescrous.fr/tools/45/search?bounds=3.4287318_44.5758211_3.5534049_44.4938499&locationName=Mende+%2848000%29"
 STATE_FILE = "state.json"
 
-# Variables d'environnement (vides en local, alimentées par GitHub Secrets en production)
 EMAIL_USER = os.getenv("EMAIL_USER", "")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL", "")
 
-# Mode debug (True = affiche des messages supplémentaires)
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
 
 def log_message(message, level="INFO"):
-    """Affiche un message avec timestamp"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] [{level}] {message}")
 
 
 def load_state():
-    """Charge l'état précédent depuis le fichier JSON"""
     try:
         if os.path.exists(STATE_FILE):
             with open(STATE_FILE, "r", encoding="utf-8") as f:
@@ -55,7 +43,6 @@ def load_state():
 
 
 def save_state(state):
-    """Sauvegarde l'état dans le fichier JSON"""
     try:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(state, f, indent=2)
@@ -66,7 +53,6 @@ def save_state(state):
 
 
 def send_email(subject, body):
-    """Envoie un email via Gmail SMTP"""
     if not EMAIL_USER or not EMAIL_PASSWORD or not RECEIVER_EMAIL:
         log_message(
             "Paramètres email manquants. Vérifiez les variables d'environnement.",
@@ -75,7 +61,6 @@ def send_email(subject, body):
         return False
 
     try:
-        # Création du message
         msg = MIMEMultipart()
         msg["From"] = EMAIL_USER
         msg["To"] = RECEIVER_EMAIL
@@ -83,7 +68,6 @@ def send_email(subject, body):
 
         msg.attach(MIMEText(body, "html", "utf-8"))
 
-        # Connexion à Gmail et envoi
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(EMAIL_USER, EMAIL_PASSWORD)
@@ -99,16 +83,11 @@ def send_email(subject, body):
 
 
 def extract_count(text):
-    """
-    Extrait le nombre de logements du texte de la page
-    Cherche les patterns comme "5 logements trouvés" ou "1 logement trouvé"
-    """
     lines = text.split("\n")
     
     for line in lines:
         line_lower = line.lower()
         if "logement" in line_lower and ("trouvé" in line_lower or "disponible" in line_lower):
-            # Cherche un nombre au début ou avant "logement"
             words = line.split()
             for i, word in enumerate(words):
                 try:
@@ -122,11 +101,9 @@ def extract_count(text):
 
 
 def setup_driver():
-    """Configure et retourne un driver Selenium"""
     try:
         options = Options()
         
-        # Mode headless (nécessaire pour GitHub Actions)
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -134,16 +111,13 @@ def setup_driver():
         options.add_argument("--disable-gpu")
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         
-        # Sur GitHub Actions, chromedriver peut être situé ailleurs
         chromedriver_path = os.getenv("CHROMEDRIVER_PATH")
         
         if chromedriver_path and os.path.exists(chromedriver_path):
-            # Utilise le chromedriver fourni par GitHub Actions
             service = Service(chromedriver_path)
             if DEBUG:
                 log_message(f"Utilisation du ChromeDriver: {chromedriver_path}", "INFO")
         else:
-            # Utilise webdriver-manager pour télécharger automatiquement
             service = Service(ChromeDriverManager().install())
         
         driver = webdriver.Chrome(service=service, options=options)
@@ -155,10 +129,6 @@ def setup_driver():
 
 
 def check_apartments():
-    """
-    Vérifie les logements CROUS
-    Retourne (count, message, change_detected)
-    """
     driver = None
     try:
         driver = setup_driver()
@@ -166,26 +136,20 @@ def check_apartments():
         log_message(f"Accès à la page CROUS: {URL}")
         driver.get(URL)
         
-        # Attendre le chargement
         time.sleep(5)
         
-        # Récupérer le texte de la page
         page_text = driver.find_element(By.TAG_NAME, "body").text
         
-        # Extraire le nombre de logements
         count, line = extract_count(page_text)
         
         if line:
             log_message(f"Résultat trouvé: {line}")
         
-        # Charger l'état précédent
         previous_state = load_state()
         previous_count = previous_state.get("count", 0)
         
-        # Vérifier s'il y a un changement
         change_detected = count != previous_count
         
-        # Mettre à jour l'état
         new_state = {
             "count": count,
             "last_update": datetime.now().isoformat(),
@@ -212,13 +176,11 @@ def check_apartments():
 
 
 def main():
-    """Fonction principale"""
     log_message("=== Début de la surveillance CROUS ===")
     
     count, message, change_detected = check_apartments()
     
     if change_detected and count is not None:
-        # Préparer et envoyer l'email
         subject = f"🏠 Nouveau logement CROUS détecté à Mende! ({count} disponible(s))"
         
         body = f"""

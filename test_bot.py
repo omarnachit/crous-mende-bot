@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""
-Script de test local - Utile pour vérifier que le bot fonctionne avant GitHub Actions
-Utilisation:
-    python test_bot.py
-    
-Vous pouvez aussi définir les variables d'environnement:
-    set EMAIL_USER=votre_email@gmail.com
-    set EMAIL_PASSWORD=votre_app_password
-    set RECEIVER_EMAIL=votre_email@gmail.com
-    python test_bot.py
-"""
 
 import os
 import sys
@@ -19,7 +8,6 @@ def main():
     print("🧪 TEST DU BOT CROUS MENDE")
     print("="*60 + "\n")
     
-    # Vérifier les dépendances
     print("1️⃣  Vérification des dépendances...")
     try:
         import selenium
@@ -31,7 +19,6 @@ def main():
         print("   >> pip install -r requirements.txt\n")
         sys.exit(1)
     
-    # Vérifier les variables d'environnement
     print("\n2️⃣  Vérification des variables d'environnement...")
     email_user = os.getenv("EMAIL_USER", "")
     email_password = os.getenv("EMAIL_PASSWORD", "")
@@ -52,12 +39,10 @@ def main():
     else:
         print("   ⚠️  RECEIVER_EMAIL non défini (emails ne seront pas envoyés)")
     
-    # Lancer le bot
     print("\n3️⃣  Exécution du bot...")
     print("   Patience, cela peut prendre 10-20 secondes...\n")
     
     try:
-        # Importer et lancer le bot
         from mende_bot import main
         main()
     except Exception as e:
