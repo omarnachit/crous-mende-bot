@@ -65,3 +65,4 @@ jobs:
           commit_message: "📊 Mise à jour de l'état CROUS"
           file_pattern: state.json
           commit_options: '--no-verify'
+          token: ${{ secrets.GITHUB_TOKEN }}
